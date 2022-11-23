@@ -3,7 +3,6 @@ import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import { configureApi, executeApi } from '~/js/api/api'
 
-const api = ref(null)
 const terms = ref(null)
 const showModal = ref(false)
 const deletableId = ref(null)
@@ -15,11 +14,11 @@ const pagination = ref({
 })
 
 const getEditUrl = (id) => {
-    return `${ window.api }/glossary/edit/${ id }`
+    return `${ window.api.url }/${ window.api.cp }/glossary/edit/${ id }`
 }
 
 const getDeleteUrl = (id) => {
-    return `${ window.api }/glossary/delete/${ id }`
+    return `${ window.api.url }/${ window.api.cp }/glossary/delete/${ id }`
 }
 
 const onToggleModal = (state, id = null) => {
@@ -33,9 +32,9 @@ const onLoadMore = () => {
 }
 
 const onFetch = async() => {
-    api.value = axios.create(configureApi(window.api))
+    const api = axios.create(configureApi(window.api.url))
 
-    await executeApi(api.value, 'glossary/get-glossary', `?limit=${pagination.value.hitsPerPage}&offset=${pagination.value.currentPage}`, (response) => {
+    await executeApi(api, 'glossary/get-glossary', `?limit=${pagination.value.hitsPerPage}&offset=${pagination.value.currentPage}`, (response) => {
         terms.value = [...(terms.value || []), ...response.glossary]
         pagination.value.currentPage += 1
         pagination.value.total = Math.ceil(response.total / pagination.value.hitsPerPage)

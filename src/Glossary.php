@@ -159,6 +159,22 @@ class Glossary extends Plugin
             }
         );
 
+        Event::on(
+            UrlManager::class,
+            UrlManager::EVENT_REGISTER_SITE_URL_RULES,
+            function (RegisterUrlRulesEvent $event) {
+                Craft::debug(
+                    'UrlManager::EVENT_REGISTER_CP_URL_RULES',
+                    __METHOD__
+                );
+                // Register our control panel routes
+                $event->rules = array_merge(
+                    $event->rules,
+                    $this->customSiteRoutes()
+                );
+            }
+        );
+
         Craft::info(
             Craft::t(
                 'glossary',
@@ -175,10 +191,18 @@ class Glossary extends Plugin
     {
         return [
             'glossary' => 'glossary/glossary/overview',
-            'glossary/get-glossary' => 'glossary/glossary/get-glossary',
             'glossary/edit/<glossaryId:\d>' => 'glossary/glossary/edit',
             'glossary/delete/<glossaryId:\d>' => 'glossary/glossary/delete',
             'glossary/add' => 'glossary/glossary/edit',
+        ];
+    }
+
+    // Protected Methods
+    // =========================================================================
+    protected function customSiteRoutes(): array
+    {
+        return [
+            'glossary/get-glossary' => 'glossary/glossary/get-glossary',
         ];
     }
 }
