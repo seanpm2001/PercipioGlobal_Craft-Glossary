@@ -1,0 +1,15 @@
+{
+  "src/js/main.ts": {
+    "file": "assets/main.5a84d0ed.js",
+    "src": "src/js/main.ts",
+    "isEntry": true,
+    "css": [
+      "assets/main.51770fd5.css"
+    ]
+  },
+  "src/js/glossary.ts": {
+    "file": "assets/glossary.a24ef79c.js",
+    "src": "src/js/glossary.ts",
+    "isEntry": true
+  }
+}
