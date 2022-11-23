@@ -1,0 +1,56 @@
+{
+    "name": "percipiolondon/craft-glossary",
+    "description": "Create a glossary of terms",
+    "type": "craft-plugin",
+    "version": "1.0.0",
+    "keywords": [
+        "craft",
+        "cms",
+        "craftcms",
+        "craft-plugin",
+        "glossary"
+    ],
+    "support": {
+        "docs": "https://github.com/percipioglobal/glossary/blob/master/README.md",
+        "issues": "https://github.com/percipioglobal/glossary/issues"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "percipiolondon",
+            "homepage": "https://percipio.london"
+        }
+    ],
+    "require": {
+        "php": "^8.0.2",
+        "craftcms/cms": "^4.0.0"
+    },
+    "require-dev": {
+        "craftcms/phpstan": "dev-main",
+        "codeception/codeception": "^5.0",
+        "vlucas/phpdotenv": "^3.0"
+    },
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://asset-packagist.org"
+        }
+    ],
+    "scripts": {
+        "phpstan": "phpstan --memory-limit=1G"
+    },
+    "autoload": {
+        "psr-4": {
+            "percipiolondon\\glossary\\": "src/"
+        }
+    },
+    "extra": {
+        "name": "Glossary",
+        "handle": "glossary",
+        "developer": "percipiolondon",
+        "developerUrl": "https://percipio.london",
+        "documentationUrl": "https://github.com/percipioglobal/craft-glossary/blob/master/README.md",
+        "changelogUrl": "https://raw.githubusercontent.com/percipioglobal/craft-glossary/master/CHANGELOG.md",
+        "class": "percipiolondon\\glossary\\Glossary"
+    }
+}

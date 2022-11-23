@@ -1,0 +1,15 @@
+{%- extends '_layouts/cp' -%}
+
+{%- block head -%}
+
+    {{- parent() -}}
+
+    {%- set tagOptions = {
+        'depends': [
+            'percipiolondon\\glossary\\assetbundles\\glossary\\GlossaryAsset'
+        ]
+    } -%}
+
+    {{- craft.glossary.register('src/js/main.ts', false, tagOptions, tagOptions) -}}
+
+{%- endblock -%}
