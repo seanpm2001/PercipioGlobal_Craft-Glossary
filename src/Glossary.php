@@ -164,7 +164,7 @@ class Glossary extends Plugin
             UrlManager::EVENT_REGISTER_SITE_URL_RULES,
             function (RegisterUrlRulesEvent $event) {
                 Craft::debug(
-                    'UrlManager::EVENT_REGISTER_CP_URL_RULES',
+                    'UrlManager::EVENT_REGISTER_SITE_URL_RULES',
                     __METHOD__
                 );
                 // Register our control panel routes
