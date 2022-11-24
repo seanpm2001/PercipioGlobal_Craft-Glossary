@@ -79,9 +79,20 @@ class GlossaryTwigExtension extends AbstractExtension
     public function glossary($text): string
     {
         $glossaries = GlossaryRecord::find()->all();
+        $view = \Craft::$app->getView();
+        $termTemplate = '<span class="glossary-term">{{ text }}</span>';
 
         foreach ($glossaries as $glossary) {
-            $text = preg_replace("/\b(".$glossary->term.")\b/i", '<span class="glossary"><span class="glossary-term">$1</span><span class="glossary-definition">'.$glossary->definition.'</span></span>', $text);
+            // https://stackoverflow.com/questions/20767089/preg-replace-when-not-inside-double-quotes
+            $pattern = '/\b'.$glossary->term.'\b(?![^"]*"(?:(?:[^"]*"){2})*[^"]*$)/i';
+            $replacement = '<span class="glossary"><span class="glossary-term">${1}</span><span class="glossary-definition">'.$glossary->definition.'</span></span>';
+            $text = preg_replace_callback(
+                $pattern,
+                function ($matches) use ($glossary){
+                    return '<span class="glossary"><span class="glossary-term">'.$matches[0].'</span><span class="glossary-definition">'.$glossary->definition.'</span></span>';
+                },
+                $text
+            );
         }
 
         return $text;
