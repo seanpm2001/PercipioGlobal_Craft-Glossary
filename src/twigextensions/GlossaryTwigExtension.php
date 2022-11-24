@@ -81,7 +81,7 @@ class GlossaryTwigExtension extends AbstractExtension
         $glossaries = GlossaryRecord::find()->all();
 
         foreach ($glossaries as $glossary) {
-            $text = str_replace($glossary->term, '<span class="glossary"><span class="glossary-term">'.$glossary->term.'</span>'.'<span class="glossary-definition">'.$glossary->definition.'</span></span>', $text);
+            $text = preg_replace("/\b(".$glossary->term.")\b/i", '<span class="glossary"><span class="glossary-term">$1</span><span class="glossary-definition">'.$glossary->definition.'</span></span>', $text);
         }
 
         return $text;
