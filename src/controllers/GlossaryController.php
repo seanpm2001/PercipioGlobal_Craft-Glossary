@@ -40,7 +40,9 @@ class GlossaryController extends Controller
 {
     // Protected Properties
     // =========================================================================
-    protected array|int|bool $allowAnonymous = [];
+    protected array|int|bool $allowAnonymous = [
+        'get-glossary'
+    ];
 
     // Public Methods
     // =========================================================================
@@ -130,7 +132,7 @@ class GlossaryController extends Controller
             $glossary = new GlossaryRecord();
         }
 
-        $glossary->term = $term;
+        $glossary->term = strtolower($term);
         $glossary->definition = $definition;
         $glossary->siteId = $siteId;
 
