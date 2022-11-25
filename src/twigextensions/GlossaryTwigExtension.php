@@ -89,7 +89,7 @@ class GlossaryTwigExtension extends AbstractExtension
             $text = preg_replace_callback(
                 $pattern,
                 function ($matches) use ($glossary){
-                    return '<span class="glossary"><span class="glossary-term">'.$matches[0].'</span><span class="glossary-definition">'.$glossary->definition.'</span></span>';
+                    return '<span class="glossary"><span class="glossary-term">'.$matches[0].'</span><span class="glossary-definition">'.$glossary->definition.'</span></span>&nbsp;';
                 },
                 $text
             );
