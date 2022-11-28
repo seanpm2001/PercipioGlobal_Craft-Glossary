@@ -52,11 +52,11 @@ onMounted(async () => {
     <div class="rounded-xl border border-gray-200">
       <!-- heading -->
       <div class="grid grid-cols-5 rounded-tr-xl rounded-tl-xl bg-gray-100">
-        <div class="col-span-2 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+        <div class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
           Term
         </div>
 
-        <div class="col-span-2 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+        <div class="col-span-3 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
           Definition
         </div>
 
@@ -71,10 +71,10 @@ onMounted(async () => {
         :key="term.term"
         class="grid grid-cols-5"
       >
-        <div class="col-span-2 px-6 py-4 whitespace-nowrap flex items-center">
+        <div class="px-6 py-4 whitespace-nowrap flex items-center">
           {{ term.term }}
         </div>
-        <div class="col-span-2 px-6 py-4 flex items-center">
+        <div class="col-span-3 px-6 py-4 flex items-center">
           {{ term.definition }}
         </div>
         <div class="px-6 py-4 whitespace-nowrap flex items-center space-x-4">
