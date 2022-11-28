@@ -98,10 +98,14 @@ class GlossaryTwigExtension extends AbstractExtension
         return $text;
     }
 
-    public function getGlossary($term): string
+    public function getGlossary($term): ?string
     {
-        $glossary = GlossaryRecord::findOne(['term' => $term]);
+        $glossary = GlossaryRecord::findOne(['term' => strtolower($term)]);
 
-        return $glossary->definition;
+        if (!is_null($glossary)) {
+            return $glossary->definition;
+        }
+
+        return null;
     }
 }
