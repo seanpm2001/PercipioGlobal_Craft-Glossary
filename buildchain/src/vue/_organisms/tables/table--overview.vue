@@ -74,7 +74,7 @@ onMounted(async () => {
         <div class="col-span-2 px-6 py-4 whitespace-nowrap flex items-center">
           {{ term.term }}
         </div>
-        <div class="col-span-2 px-6 py-4 whitespace-nowrap flex items-center">
+        <div class="col-span-2 px-6 py-4 flex items-center">
           {{ term.definition }}
         </div>
         <div class="px-6 py-4 whitespace-nowrap flex items-center space-x-4">
