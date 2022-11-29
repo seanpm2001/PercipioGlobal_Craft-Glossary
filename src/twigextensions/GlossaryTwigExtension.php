@@ -78,7 +78,9 @@ class GlossaryTwigExtension extends AbstractExtension
      */
     public function glossary($text): string
     {
-        $glossaries = GlossaryRecord::find()->all();
+        $glossaries = GlossaryRecord::find()
+            ->orderBy(['term' => SORT_ASC])
+            ->all();
         $view = \Craft::$app->getView();
         $termTemplate = '<span class="glossary-term">{{ text }}</span>';
 

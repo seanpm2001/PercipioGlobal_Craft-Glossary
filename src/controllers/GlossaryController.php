@@ -67,11 +67,12 @@ class GlossaryController extends Controller
         return $this->renderTemplate('glossary/index', $variables);
     }
 
-    public function actionGetGlossary(int $limit = null, int $offset = null): Response
+    public function actionGetGlossary(int $limit = null, int $offset = null, int $sort = SORT_DESC): Response
     {
         return $this->asJson([
             'success' => true,
             'glossary' => GlossaryRecord::find()
+                ->orderBy(['term' => $sort])
                 ->limit($limit)
                 ->offset($offset)
                 ->all(),

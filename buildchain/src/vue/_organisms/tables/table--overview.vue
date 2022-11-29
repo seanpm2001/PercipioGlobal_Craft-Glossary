@@ -34,7 +34,7 @@ const onLoadMore = () => {
 const onFetch = async() => {
     const api = axios.create(configureApi(window.api.url))
 
-    await executeApi(api, 'glossary/get-glossary', `?limit=${pagination.value.hitsPerPage}&offset=${pagination.value.currentPage}`, (response) => {
+    await executeApi(api, 'glossary/get-glossary', `?limit=${pagination.value.hitsPerPage}&offset=${pagination.value.currentPage}&sort=4`, (response) => {
         terms.value = [...(terms.value || []), ...response.glossary]
         pagination.value.currentPage += 1
         pagination.value.total = Math.ceil(response.total / pagination.value.hitsPerPage)
