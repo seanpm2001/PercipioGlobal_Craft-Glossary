@@ -12,4 +12,15 @@
 
     {{- craft.glossary.register('src/js/main.ts', false, tagOptions, tagOptions) -}}
 
+    <script>
+        window.api = {
+            url: "{{- siteUrl -}}",
+            cp: "{{- craft.app.request.generalConfig.cpTrigger -}}",
+            csrf: {
+                name: "{{- craft.app.config.general.csrfTokenName|e('js') -}}",
+                value: "{{- craft.app.request.csrfToken|e('js') -}}"
+            }
+        }
+    </script>
+
 {%- endblock -%}

@@ -56,6 +56,7 @@ class Install extends Migration
     public function safeUp()
     {
         $this->driver = Craft::$app->getConfig()->getDb()->driver;
+
         if ($this->createTables()) {
             $this->createIndexes();
             $this->addForeignKeys();
@@ -100,7 +101,9 @@ class Install extends Migration
     // glossary table
         $tableSchema = Craft::$app->db->schema->getTableSchema('{{%glossary}}');
         if ($tableSchema === null) {
+
             $tablesCreated = true;
+
             $this->createTable(
                 '{{%glossary}}',
                 [
@@ -108,12 +111,42 @@ class Install extends Migration
                     'dateCreated' => $this->dateTime()->notNull(),
                     'dateUpdated' => $this->dateTime()->notNull(),
                     'uid' => $this->uid(),
-                // Custom columns in the table
+                    // fk
                     'siteId' => $this->integer()->notNull(),
-                    'term' => $this->string(255)->notNull()->defaultValue(''),
-                    'definition' => $this->longText(),
+                    'parentId' => $this->integer(),
+                    // Custom columns in the table
+                    'term' => $this->string(255)->notNull(),
                 ]
             );
+
+            $this->createTable(
+                '{{%glossary_definition}}',
+                [
+                    'id' => $this->primaryKey(),
+                    'dateCreated' => $this->dateTime()->notNull(),
+                    'dateUpdated' => $this->dateTime()->notNull(),
+                    'uid' => $this->uid(),
+                    // fk
+                    'glossaryId' => $this->integer(),
+                    // Custom columns in the table
+                    'sectionHandle' => $this->string(255),
+                    'definition' => $this->longText()
+                ]
+            );
+
+//            $this->createTable(
+//                '{{%glossary_relations}}',
+//                [
+//                    'id' => $this->primaryKey(),
+//                    'dateCreated' => $this->dateTime()->notNull(),
+//                    'dateUpdated' => $this->dateTime()->notNull(),
+//                    'uid' => $this->uid(),
+//                    // Custom columns in the table
+//                    'glossaryId' => $this->integer(),
+//                    'glossaryTermId' => $this->integer(),
+//                    'glossaryDefinitionId' => $this->integer(),
+//                ]
+//            );
         }
 
         return $tablesCreated;
@@ -124,27 +157,45 @@ class Install extends Migration
      *
      * @return void
      */
-    protected function createIndexes()
+    protected function createIndexes(): void
     {
     // glossary table
         $this->createIndex(
-            $this->db->getIndexName(
-                '{{%glossary}}',
-                'term',
-                true
-            ),
+            $this->db->getIndexName('{{%glossary}}', 'term', true ),
             '{{%glossary}}',
             'term',
             true
         );
-
-        // Additional commands depending on the db driver
-        switch ($this->driver) {
-            case DbConfig::DRIVER_MYSQL:
-                break;
-            case DbConfig::DRIVER_PGSQL:
-                break;
-        }
+        $this->createIndex(
+            $this->db->getIndexName('{{%glossary}}', 'parentId', true ),
+            '{{%glossary}}',
+            'parentId',
+            true
+        );
+        $this->createIndex(
+            $this->db->getIndexName('{{%glossary_definition}}', 'sectionHandle', true ),
+            '{{%glossary_definition}}',
+            'sectionHandle',
+            true
+        );
+//        $this->createIndex(
+//            $this->db->getIndexName('{{%glossary}}', 'id', true ),
+//            '{{%glossary_relations}}',
+//            'glossaryId',
+//            true
+//        );
+//        $this->createIndex(
+//            $this->db->getIndexName('{{%glossary_term}}', 'id', true ),
+//            '{{%glossary_relations}}',
+//            'glossaryTermId',
+//            true
+//        );
+//        $this->createIndex(
+//            $this->db->getIndexName('{{%glossary_definition}}', 'id', true ),
+//            '{{%glossary_relations}}',
+//            'glossaryDefinitionId',
+//            true
+//        );
     }
 
     /**
@@ -155,15 +206,13 @@ class Install extends Migration
     protected function addForeignKeys()
     {
     // glossary table
-        $this->addForeignKey(
-            $this->db->getForeignKeyName('{{%glossary}}', 'siteId'),
-            '{{%glossary}}',
-            'siteId',
-            '{{%sites}}',
-            'id',
-            'CASCADE',
-            'CASCADE'
-        );
+        $this->addForeignKey($this->db->getForeignKeyName('{{%glossary}}', 'siteId'), '{{%glossary}}', 'siteId', '{{%sites}}', 'id', 'CASCADE', 'CASCADE');
+        $this->addForeignKey($this->db->getForeignKeyName('{{%glossary}}', 'parentId'), '{{%glossary}}', 'parentId', '{{%glossary}}', 'id', 'CASCADE', 'CASCADE');
+        $this->addForeignKey($this->db->getForeignKeyName('{{%glossary_definition}}', 'sectionHandle'), '{{%glossary_definition}}', 'sectionHandle', '{{%sections}}', 'handle', 'CASCADE', 'CASCADE');
+        $this->addForeignKey($this->db->getForeignKeyName('{{%glossary_definition}}', 'glossaryId'), '{{%glossary_definition}}', 'glossaryId', '{{%glossary}}', 'id', 'CASCADE', 'CASCADE');
+//        $this->addForeignKey($this->db->getForeignKeyName('{{%glossary}}', 'id'), '{{%glossary_relations}}', 'glossaryId', '{{%glossary}}', 'id', 'CASCADE', 'CASCADE');
+//        $this->addForeignKey($this->db->getForeignKeyName('{{%glossary_definition}}', 'id'), '{{%glossary_relations}}', 'glossaryDefinitionId', '{{%glossary_definition}}', 'id', 'CASCADE', 'CASCADE');
+//        $this->addForeignKey($this->db->getForeignKeyName('{{%glossary_term}}', 'id'), '{{%glossary_relations}}', 'glossaryTermId', '{{%glossary_term}}', 'id', 'CASCADE', 'CASCADE');
     }
 
     /**
@@ -183,6 +232,8 @@ class Install extends Migration
     protected function removeTables()
     {
     // glossary table
+//        $this->dropTableIfExists('{{%glossary_relations}}');
+        $this->dropTableIfExists('{{%glossary_definition}}');
         $this->dropTableIfExists('{{%glossary}}');
     }
 }

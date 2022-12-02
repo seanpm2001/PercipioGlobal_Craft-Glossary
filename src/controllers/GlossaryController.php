@@ -12,6 +12,7 @@ namespace percipiolondon\glossary\controllers;
 
 use Craft;
 
+use percipiolondon\glossary\records\GlossaryDefinitionRecord;
 use percipiolondon\glossary\records\GlossaryRecord;
 use yii\web\Response;
 use craft\web\Controller;
@@ -41,6 +42,7 @@ class GlossaryController extends Controller
     // Protected Properties
     // =========================================================================
     protected array|int|bool $allowAnonymous = [
+        'get-glossaries',
         'get-glossary'
     ];
 
@@ -67,16 +69,46 @@ class GlossaryController extends Controller
         return $this->renderTemplate('glossary/index', $variables);
     }
 
-    public function actionGetGlossary(int $limit = null, int $offset = null, int $sort = SORT_DESC): Response
+    public function actionGetGlossaries(int $limit = null, int $offset = null, int $sort = SORT_DESC): Response
+    {
+        $glossaries = GlossaryRecord::find()
+            ->where(['not', ['parentId' => null]])
+            ->limit($limit)
+            ->offset($offset)
+            ->all();
+
+        $glossariesData = [];
+
+        foreach($glossaries as $glossary) {
+
+            $variants = GlossaryRecord::findAll(['parentId' => $glossary->id]);
+            $definitions = GlossaryDefinitionRecord::findAll(['glossaryId' => $glossary->id]);
+
+            $data = [];
+            $data['id'] = $glossary->id;
+            $data['term'] = $glossary->term;
+            $data['variants'] = $variants;
+            $data['definitions'] = $definitions;
+
+            $glossariesData[] = $data;
+        }
+
+        return $this->asJson([
+            'success' => true,
+            'glossary' => $glossariesData,
+            'total' => GlossaryRecord::find()->count()
+        ]);
+    }
+
+    public function actionGetGlossary(int $id): Response
     {
         return $this->asJson([
             'success' => true,
-            'glossary' => GlossaryRecord::find()
-                ->orderBy(['term' => $sort])
-                ->limit($limit)
-                ->offset($offset)
+            'term' => GlossaryRecord::findOne($id),
+            'variants' => GlossaryRecord::find()
+                ->where(['parentId' => $id])
                 ->all(),
-            'total' => GlossaryRecord::find()->count()
+            'definitions' => GlossaryDefinitionRecord::findAll(['glossaryId' => $id]),
         ]);
     }
 
@@ -122,11 +154,16 @@ class GlossaryController extends Controller
         $success = false;
 
         $request = Craft::$app->getRequest();
-        $id = $request->getBodyParam('glossaryId');
+
+        $id = $request->getBodyParam('id');
         $term = $request->getBodyParam('term');
-        $definition = $request->getBodyParam('definition');
+        $variants = $request->getBodyParam('termVariants');
+        $definitions = $request->getBodyParam('definition');
         $siteId = $request->getBodyParam('siteId');
 
+        $errors = [];
+
+        // save glossary
         if ($id) {
             $glossary = GlossaryRecord::findOne($id);
         } else {
@@ -134,34 +171,119 @@ class GlossaryController extends Controller
         }
 
         $glossary->term = strtolower($term);
-        $glossary->definition = $definition;
         $glossary->siteId = $siteId;
+        $success = $glossary->save();
 
-        if (GlossaryRecord::findOne(['term' => $term])) {
-            $glossary->addError('term', 'This term already exists');
+        if (!$success) {
+            $errors[] = $glossary->errors;
         }
 
-        if ($glossary->validate()) {
-            $success = $glossary->save();
+
+        /* VARIANTS */
+        // get all variants to reduce the list and the ones left needs to be deleted
+        $variantsToDelete = GlossaryRecord::find()
+            ->where(['parentId' => $glossary->id])
+            ->all();
+
+        // save variants
+        foreach($variants as $variant) {
+
+            // remove variant from variants to delete
+            $variantsToDelete = array_filter($variantsToDelete, function($var) use ($variant) {
+                return $var->term !== $variant;
+            });
+
+            // fetch variant if existing
+            $termRecord = GlossaryRecord::find()
+                ->where(['parentId' => $glossary->id, 'term' => $variant])
+                ->one();
+
+            // save current glossary
+            if ( is_null($termRecord)) {
+                $termRecord = new GlossaryRecord();
+            }
+
+            $termRecord->term = strtolower($variant);
+            $termRecord->parentId = $glossary->id;
+            $termRecord->siteId = $siteId;
+            $success = $termRecord->save();
+
+            if (!$success) {
+                $errors[] = $termRecord->errors;
+            }
         }
 
-        if ($success) {
-            return $this->redirect('/' . Craft::$app->request->generalConfig->cpTrigger . '/glossary');
+        // delete variants if existing
+        foreach ($variantsToDelete as $deleteVariant) {
+            $deleteVariant->delete();
         }
 
-        $glossary->save();
 
-        $pluginName = 'Glossary';
-        $templateTitle = Craft::t('glossary', 'Glossary');
+        /* DEFINITIONS */
+        // get all variants to reduce the list and the ones left needs to be deleted
+        $definitionsToDelete = GlossaryDefinitionRecord::find()
+            ->where(['glossaryId' => $glossary->id])
+            ->all();
 
-        $variables['controllerHandle'] = 'glossary';
-        $variables['title'] = $templateTitle;
-        $variables['docTitle'] = sprintf('%s - %s', $pluginName, $templateTitle);
-        $variables['glossary'] = $glossary;
-        $variables['errors'] = $glossary->getErrors();
+        // save definitions
+        foreach($definitions as $definition) {
 
-        // Render the template
-        return $this->renderTemplate('glossary/form', $variables);
+            // remove variant from variants to delete
+            $definitionsToDelete = array_filter($definitionsToDelete, function($def) use ($definition) {
+                return $def['id'] !== $definition['id'];
+            });
+
+            // get difinition
+            $definitionRecord = GlossaryDefinitionRecord::findOne($definition['id']);
+
+            if (is_null($definitionRecord)) {
+                $definitionRecord = new GlossaryDefinitionRecord();
+            }
+            $definitionRecord->definition = $definition['definition'];
+            $definitionRecord->glossaryId = $glossary->id;
+
+            if ($definition['exposure'] !== 'all') {
+                $definitionRecord->sectionHandle = $definition['exposure'];
+            }
+
+            $success = $definitionRecord->save();
+
+            if (!$success) {
+                $errors[] = $definitionRecord->errors;
+            }
+        }
+
+        // delete definitions if existing
+        foreach ($definitionsToDelete as $deleteDefinition) {
+            $deleteDefinition->delete();
+        }
+
+        return $this->asJson([
+            'success' => $success,
+            'errors' => $errors
+        ]);
+
+//        if (GlossaryRecord::findOne(['term' => $term])) {
+//            $glossary->addError('term', 'This term already exists');
+//        }
+
+//        if ($success) {
+//            return $this->redirect('/' . Craft::$app->request->generalConfig->cpTrigger . '/glossary');
+//        }
+
+//        $glossary->save();
+//
+//        $pluginName = 'Glossary';
+//        $templateTitle = Craft::t('glossary', 'Glossary');
+//
+//        $variables['controllerHandle'] = 'glossary';
+//        $variables['title'] = $templateTitle;
+//        $variables['docTitle'] = sprintf('%s - %s', $pluginName, $templateTitle);
+//        $variables['glossary'] = $glossary;
+//        $variables['errors'] = $glossary->getErrors();
+//
+//        // Render the template
+//        return $this->renderTemplate('glossary/form', $variables);
     }
 
 

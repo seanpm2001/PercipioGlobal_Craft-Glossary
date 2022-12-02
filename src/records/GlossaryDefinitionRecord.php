@@ -27,32 +27,16 @@ use craft\db\ActiveRecord;
  * @author    percipiolondon
  * @package   Glossary
  * @since     1.0.0
- * @property int $siteId
- * @property int $parentId
- * @property string $term
+ * @property string $definition
+ * @property string $sectionHandle
+ * @property int $glossaryId
  */
-class GlossaryRecord extends ActiveRecord
+class GlossaryDefinitionRecord extends ActiveRecord
 {
-
-    // Public Static Methods
-    // =========================================================================
-    public function rules()
-    {
-        $rules = parent::rules();
-        $rules[] = [[
-            'siteId',
-            'term',
-        ], 'required'];
-
-        $rules[] = [['term'], 'unique'];
-
-        return $rules;
-    }
-
     // Public Static Methods
     // =========================================================================
 
-     /**
+    /**
      * Declares the name of the database table associated with this AR class.
      * By default this method returns the class name as the table name by calling [[Inflector::camel2id()]]
      * with prefix [[Connection::tablePrefix]]. For example if [[Connection::tablePrefix]] is `tbl_`,
@@ -66,7 +50,7 @@ class GlossaryRecord extends ActiveRecord
      */
     public static function tableName()
     {
-        return '{{%glossary}}';
+        return '{{%glossary_definition}}';
     }
 
 }

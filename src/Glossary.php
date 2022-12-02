@@ -202,6 +202,7 @@ class Glossary extends Plugin
     protected function customSiteRoutes(): array
     {
         return [
+            'glossary/get-glossaries' => 'glossary/glossary/get-glossaries',
             'glossary/get-glossary' => 'glossary/glossary/get-glossary',
         ];
     }
