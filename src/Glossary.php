@@ -191,8 +191,8 @@ class Glossary extends Plugin
     {
         return [
             'glossary' => 'glossary/glossary/overview',
-            'glossary/edit/<glossaryId:\d>' => 'glossary/glossary/edit',
-            'glossary/delete/<glossaryId:\d>' => 'glossary/glossary/delete',
+            'glossary/edit' => 'glossary/glossary/edit',
+            'glossary/delete' => 'glossary/glossary/delete',
             'glossary/add' => 'glossary/glossary/edit',
         ];
     }
