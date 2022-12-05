@@ -23,10 +23,28 @@ const exposureInput = ref('all')
 const variants = ref([])
 const definitions = ref([])
 const errors = ref({
-    form: null,
+    form: [],
     definition: null
 })
 const editId = ref(null)
+const loading = ref(false)
+const success = ref(false)
+
+const getErrors = (key) => {
+    let keyedErrors = {}
+
+    errors.value.form.forEach(err => {
+        if (err[key] ?? null) {
+            if (typeof keyedErrors[key] === 'undefined') {
+                keyedErrors[key] = []
+            }
+
+            keyedErrors[key].push(err[key][0])
+        }
+    })
+
+    return keyedErrors[key]
+}
 
 const addVariant = () => {
     if (variants.value.indexOf(termsInput.value) === -1) {
@@ -98,6 +116,8 @@ const cancelDefinition = () => {
 }
 
 const submitForm = evt => {
+    loading.value = true
+
     const data = {
         term: termInput.value,
         termVariants: variants.value,
@@ -114,13 +134,25 @@ const submitForm = evt => {
         url: `${window.api.url}${window.api.cp}/actions/${props.action}`,
         data: data
     })
-        .then(function (response) {
-            console.log(response)
-        });
+    .then(function (response) {
+        if (response?.data?.errors.length > 0) {
+            errors.value.form = response?.data?.errors
+        } else {
+            errors.value.form = []
+            success.value = true
+
+            setTimeout(() => {
+                success.value = false
+            }, 5000)
+        }
+
+        loading.value = false
+    });
 }
 
 onMounted(async () => {
     if (props.glossaryId && props.glossaryId > 0) {
+        loading.value = true
         const api = axios.create(configureApi(window.api.url))
 
         await executeApi(api, 'glossary/get-glossary', `?id=${props.glossaryId}`, (response) => {
@@ -134,6 +166,8 @@ onMounted(async () => {
                     exposureName: JSON.parse(props.sections).find(section => section.handle === definition.sectionHandle)?.name ?? 'all'
                 }
             })
+
+            loading.value = false
         })
     }
 })
@@ -157,6 +191,18 @@ onMounted(async () => {
 
             <label class="mb-5 block">
                 <span class="text-gray-700 block font-bold">Term <span class="text-red-500">*</span></span>
+
+                <ul
+                    v-if="getErrors('term')"
+                    class="list-disc ml-3 pl-px"
+                >
+                    <li
+                        v-for="error in getErrors('term')"
+                        :key="error"
+                        class="text-red-500"
+                    >{{ error }}</li>
+                </ul>
+
                 <div class="flex flex-nowrap mt-2">
                     <input
                         v-model="termInput"
@@ -168,6 +214,18 @@ onMounted(async () => {
             <label class="mb-5 block">
                 <span class="text-gray-700 block font-bold">Term variants</span>
                 <span class="text-gray-500 text-sm">Press enter to confirm your variant</span>
+
+                <ul
+                    v-if="getErrors('termVariants')"
+                    class="list-disc ml-3 pl-px"
+                >
+                    <li
+                        v-for="error in getErrors('termVariants')"
+                        :key="error"
+                        class="text-red-500"
+                    >{{ error }}</li>
+                </ul>
+
                 <div :class="[
                     'form-input block w-full text-sm rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 mt-2',
                     variants.length > 0 ? 'pb-1' : ''
@@ -196,6 +254,18 @@ onMounted(async () => {
             </label>
 
             <span class="text-gray-700 block font-bold">Definitions</span>
+
+            <ul
+                v-if="getErrors('definition')"
+                class="list-disc ml-3 pl-px"
+            >
+                <li
+                    v-for="error in getErrors('definition')"
+                    :key="error"
+                    class="text-red-500"
+                >{{ error }}</li>
+            </ul>
+
             <div class="rounded-xl border border-gray-200 mt-2 overflow-hidden">
 
                 <div class="grid grid-cols-4 bg-gray-100">
@@ -235,7 +305,7 @@ onMounted(async () => {
                         <button
                             @click="() => removeDefinition(definition.exposure)"
                             type="button"
-                            class="cursor-pointer inline-block bg-red-300 text-red-800 font-bold py-1 px-2 text-sm rounded-lg cursor-pointer"
+                            class="cursor-pointer inline-block bg-red-300 text-red-800 font-bold py-1 px-2 text-sm rounded-lg"
                         >
                             Delete
                         </button>
@@ -272,7 +342,7 @@ onMounted(async () => {
                             v-if="!editId"
                             @click="addDefinition"
                             type="button"
-                            class="cursor-pointer inline-block bg-indigo-500 text-white font-bold py-1 px-2 text-sm rounded-lg cursor-pointer"
+                            class="cursor-pointer inline-block bg-indigo-500 text-white font-bold py-1 px-2 text-sm rounded-lg"
                         >
                             Add
                         </button>
@@ -280,7 +350,7 @@ onMounted(async () => {
                             v-if="editId"
                             @click="saveDefinition"
                             type="button"
-                            class="cursor-pointer inline-block bg-indigo-500 text-white font-bold mr-2 py-1 px-2 text-sm rounded-lg cursor-pointer"
+                            class="cursor-pointer inline-block bg-indigo-500 text-white font-bold mr-2 py-1 px-2 text-sm rounded-lg"
                         >
                             Save
                         </button>
@@ -305,10 +375,40 @@ onMounted(async () => {
             </div>
 
             <button
-                class="mt-5 ml-auto cursor-pointer block bg-indigo-500 text-white font-bold py-2 px-3 text-sm rounded-lg cursor-pointer"
+                class="mt-5 ml-auto block bg-indigo-500 text-white font-bold py-2 px-3 text-sm rounded-lg cursor-pointer"
             >
                 Submit
             </button>
+        </div>
+
+        <div v-if="loading" class="bg-gray-50/50 absolute inset-0 w-full h-full flex items-center justify-center">
+            <svg
+                class="animate-spin h-8 w-8"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+            >
+                <circle
+                    class="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    stroke-width="4"
+                />
+                <path
+                    class="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                />
+            </svg>
+        </div>
+
+        <div :class="[
+            'fixed top-0 left-1/2 -translate-x-1/2 px-4 py-1 rounded-b-lg bg-emerald-500 z-50 transition-all',
+            success ? 'opacity-1' : 'opacity-0'
+        ]">
+            <span class="text-emerald-900 font-bold font-primary">The glossary has been saved</span>
         </div>
     </form>
 </template>
