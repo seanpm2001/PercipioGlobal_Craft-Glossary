@@ -15,6 +15,7 @@ use percipiolondon\glossary\Glossary;
 use Craft;
 use craft\config\DbConfig;
 use craft\db\Migration;
+use craft\helpers\Db;
 
 /**
  * Glossary Install Migration
@@ -62,7 +63,6 @@ class Install extends Migration
             $this->addForeignKeys();
             // Refresh the db schema caches
             Craft::$app->db->schema->refresh();
-            $this->insertDefaultData();
         }
 
         return true;
@@ -81,6 +81,7 @@ class Install extends Migration
     public function safeDown()
     {
         $this->driver = Craft::$app->getConfig()->getDb()->driver;
+        $this->dropForeignKeys();
         $this->removeTables();
 
         return true;
@@ -133,20 +134,6 @@ class Install extends Migration
                     'definition' => $this->longText()
                 ]
             );
-
-//            $this->createTable(
-//                '{{%glossary_relations}}',
-//                [
-//                    'id' => $this->primaryKey(),
-//                    'dateCreated' => $this->dateTime()->notNull(),
-//                    'dateUpdated' => $this->dateTime()->notNull(),
-//                    'uid' => $this->uid(),
-//                    // Custom columns in the table
-//                    'glossaryId' => $this->integer(),
-//                    'glossaryTermId' => $this->integer(),
-//                    'glossaryDefinitionId' => $this->integer(),
-//                ]
-//            );
         }
 
         return $tablesCreated;
@@ -159,43 +146,11 @@ class Install extends Migration
      */
     protected function createIndexes(): void
     {
-    // glossary table
-        $this->createIndex(
-            $this->db->getIndexName('{{%glossary}}', 'term', true ),
-            '{{%glossary}}',
-            'term',
-            true
-        );
-        $this->createIndex(
-            $this->db->getIndexName('{{%glossary}}', 'parentId', true ),
-            '{{%glossary}}',
-            'parentId',
-            true
-        );
-        $this->createIndex(
-            $this->db->getIndexName('{{%glossary_definition}}', 'sectionHandle', true ),
-            '{{%glossary_definition}}',
-            'sectionHandle',
-            true
-        );
-//        $this->createIndex(
-//            $this->db->getIndexName('{{%glossary}}', 'id', true ),
-//            '{{%glossary_relations}}',
-//            'glossaryId',
-//            true
-//        );
-//        $this->createIndex(
-//            $this->db->getIndexName('{{%glossary_term}}', 'id', true ),
-//            '{{%glossary_relations}}',
-//            'glossaryTermId',
-//            true
-//        );
-//        $this->createIndex(
-//            $this->db->getIndexName('{{%glossary_definition}}', 'id', true ),
-//            '{{%glossary_relations}}',
-//            'glossaryDefinitionId',
-//            true
-//        );
+        // glossary table
+        $this->createIndex(null,'{{%glossary}}', 'siteId', false);
+        $this->createIndex(null,'{{%glossary}}', 'term', true);
+        $this->createIndex(null,'{{%glossary}}', 'parentId', false);
+        $this->createIndex(null,'{{%glossary_definition}}', 'sectionHandle', false);
     }
 
     /**
@@ -205,23 +160,28 @@ class Install extends Migration
      */
     protected function addForeignKeys()
     {
-    // glossary table
-        $this->addForeignKey($this->db->getForeignKeyName('{{%glossary}}', 'siteId'), '{{%glossary}}', 'siteId', '{{%sites}}', 'id', 'CASCADE', 'CASCADE');
-        $this->addForeignKey($this->db->getForeignKeyName('{{%glossary}}', 'parentId'), '{{%glossary}}', 'parentId', '{{%glossary}}', 'id', 'CASCADE', 'CASCADE');
-        $this->addForeignKey($this->db->getForeignKeyName('{{%glossary_definition}}', 'sectionHandle'), '{{%glossary_definition}}', 'sectionHandle', '{{%sections}}', 'handle', 'CASCADE', 'CASCADE');
-        $this->addForeignKey($this->db->getForeignKeyName('{{%glossary_definition}}', 'glossaryId'), '{{%glossary_definition}}', 'glossaryId', '{{%glossary}}', 'id', 'CASCADE', 'CASCADE');
-//        $this->addForeignKey($this->db->getForeignKeyName('{{%glossary}}', 'id'), '{{%glossary_relations}}', 'glossaryId', '{{%glossary}}', 'id', 'CASCADE', 'CASCADE');
-//        $this->addForeignKey($this->db->getForeignKeyName('{{%glossary_definition}}', 'id'), '{{%glossary_relations}}', 'glossaryDefinitionId', '{{%glossary_definition}}', 'id', 'CASCADE', 'CASCADE');
-//        $this->addForeignKey($this->db->getForeignKeyName('{{%glossary_term}}', 'id'), '{{%glossary_relations}}', 'glossaryTermId', '{{%glossary_term}}', 'id', 'CASCADE', 'CASCADE');
+        // glossary table
+        $this->addForeignKey(null, '{{%glossary}}', ['siteId'], '{{%sites}}', ['id'], 'CASCADE', 'CASCADE');
+        $this->addForeignKey(null, '{{%glossary}}', ['parentId'], '{{%glossary}}', ['id'], 'CASCADE', 'CASCADE');
+        $this->addForeignKey(null, '{{%glossary_definition}}', ['sectionHandle'], '{{%sections}}', ['handle'], 'CASCADE', 'CASCADE');
+        $this->addForeignKey(null, '{{%glossary_definition}}', ['glossaryId'], '{{%glossary}}', ['id'], 'CASCADE', 'CASCADE');
     }
 
     /**
-     * Populates the DB with the default data.
      *
-     * @return void
      */
-    protected function insertDefaultData()
+    public function dropForeignKeys(): void
     {
+        $tables = [
+            'glossary_definition',
+            'glossary'
+        ];
+
+        foreach ($tables as $table) {
+            if ($this->db->tableExists('{{%' . $table . '}}')) {
+                Db::dropAllForeignKeysToTable('{{%' . $table . '}}');
+            }
+        }
     }
 
     /**
@@ -232,7 +192,6 @@ class Install extends Migration
     protected function removeTables()
     {
     // glossary table
-//        $this->dropTableIfExists('{{%glossary_relations}}');
         $this->dropTableIfExists('{{%glossary_definition}}');
         $this->dropTableIfExists('{{%glossary}}');
     }
