@@ -8,9 +8,9 @@ const showModal = ref(false)
 const deletableId = ref(null)
 const loading = ref(true)
 const pagination = ref({
-    currentPage: 0,
-    hitsPerPage: 50,
-    total: 0
+        currentPage: 0,
+        hitsPerPage: 50,
+        total: 0
 })
 const alphabeth = ref("abcdefghijklmnopqrstuvwxyz".split(''))
 
@@ -33,10 +33,10 @@ const onFetch = async() => {
     const api = axios.create(configureApi(window.api.url))
 
     await executeApi(api, 'glossary/get-glossaries', `?limit=${pagination.value.hitsPerPage}&offset=${pagination.value.currentPage}&sort=4`, (response) => {
-        terms.value = [...(terms.value || []), ...response.glossary]
-        pagination.value.currentPage += 1
-        pagination.value.total = Math.ceil(response.total / pagination.value.hitsPerPage)
-        loading.value = false
+            terms.value = [...(terms.value || []), ...response.glossary]
+            pagination.value.currentPage += 1
+            pagination.value.total = Math.ceil(response.total / pagination.value.hitsPerPage)
+            loading.value = false
     })
 }
 
@@ -46,11 +46,11 @@ const onDelete = async(id) => {
     const api = axios.create(configureApi(`${window.api.url}${window.api.cp}`))
 
     await executeApi(api, 'glossary/delete', `?id=${id}`, (response) => {
-        if(response.success) {
-            terms.value = terms.value.filter(term => term.id !== id)
-            pagination.value.total -= 1
-            loading.value = false
-        }
+            if(response.success) {
+                    terms.value = terms.value.filter(term => term.id !== id)
+                    pagination.value.total -= 1
+                    loading.value = false
+            }
     })
 }
 
@@ -58,9 +58,9 @@ const sorted = computed(() => {
     let sorted = {}
 
     if (terms.value) {
-        alphabeth.value.forEach(letter => {
-            sorted[letter] = terms.value.filter(term => term.term.charAt(0) === letter)
-        })
+            alphabeth.value.forEach(letter => {
+                    sorted[letter] = terms.value.filter(term => term.term.charAt(0) === letter)
+            })
     }
 
     return sorted
@@ -75,7 +75,7 @@ onMounted(async () => {
   <section>
     <div class="rounded-xl border border-gray-200">
       <!-- heading -->
-      <div class="grid grid-cols-5 rounded-tr-xl rounded-tl-xl bg-gray-100">
+      <div class="grid grid-cols-6 rounded-tr-xl rounded-tl-xl bg-gray-100">
         <div class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
           Term
         </div>
@@ -86,6 +86,10 @@ onMounted(async () => {
 
         <div class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
           Variants
+        </div>
+
+        <div class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          Environment
         </div>
 
         <div class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -100,7 +104,7 @@ onMounted(async () => {
       >
         <div
           v-if="sortedTerms.length > 0"
-          lass="grid grid-cols-5 relative"
+          lass="grid grid-cols-6 relative"
         >
           <div class="col-span-5 px-6 py-2 bg-gray-300 sticky top-[53px] z-10">
             <span class="font-primary font-bold uppercase">{{ letter }}</span>
@@ -108,13 +112,16 @@ onMounted(async () => {
           <div 
             v-for="term in sortedTerms"
             :key="term.term"
-            class="col-span-5 grid grid-cols-5"
+            class="col-span-6 grid grid-cols-6"
           >
             <div class="px-6 py-4 whitespace-nowrap flex items-center">
               {{ term.term }}
             </div>
-            <div class="col-span-2 px-6 py-4 flex items-center">
-              <span v-if="term?.definitions">
+            <div class="col-span-2 px-6 py-4">
+              <span
+                v-if="term?.definitions"
+                class="whitespace-nowrap text-ellipsis overflow-hidden w-full block"
+              >
                 {{ term?.definitions.length === 1 ? term?.definitions[0].definition : term?.definitions.length }}
               </span>
             </div>
@@ -126,6 +133,9 @@ onMounted(async () => {
                 {{ variant.term + (i < (term.variants.length - 1) ? ',' : '') }}
               </span>
               <span v-if="term?.variants && term?.variants.length === 0">-</span>
+            </div>
+            <div class="px-6 py-4">
+              {{ term?.definitions.length === 1 ? (term?.definitions[0].sectionHandle ? term?.definitions[0].sectionHandle : 'all') : 'multiple' }}
             </div>
             <div class="px-6 py-4 whitespace-nowrap flex items-center space-x-4">
               <a
