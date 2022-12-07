@@ -10,6 +10,7 @@
 
 namespace percipiolondon\glossary;
 
+use percipiolondon\glossary\services\GlossaryService;
 use percipiolondon\glossary\twigextensions\GlossaryTwigExtension;
 use percipiolondon\glossary\variables\GlossaryVariable;
 use percipiolondon\glossary\assetbundles\glossary\GlossaryAsset;
@@ -22,6 +23,9 @@ use craft\events\RegisterUrlRulesEvent;
 use craft\web\twig\variables\CraftVariable;
 use craft\web\UrlManager;
 use nystudio107\pluginvite\services\VitePluginService;
+use craft\services\Gql;
+use craft\events\RegisterGqlDirectivesEvent;
+use percipiolondon\glossary\gql\directives\Glossary as GlossaryDirective;
 
 use yii\base\Event;
 
@@ -38,6 +42,8 @@ use yii\base\Event;
  * @author    percipiolondon
  * @package   Glossary
  * @since     1.0.0
+ *
+ * @property GlossaryService $glossaryService
  *
  */
 class Glossary extends Plugin
@@ -102,7 +108,7 @@ class Glossary extends Plugin
         self::$plugin = $this;
 
         $this->setComponents([
-            // Register the vite service
+            'glossaryService' => GlossaryService::class,
             'vite' => [
                 'class' => VitePluginService::class,
                 'assetClass' => GlossaryAsset::class,
@@ -172,6 +178,14 @@ class Glossary extends Plugin
                     $event->rules,
                     $this->customSiteRoutes()
                 );
+            }
+        );
+
+        Event::on(
+            Gql::class,
+            Gql::EVENT_REGISTER_GQL_DIRECTIVES,
+            function (RegisterGqlDirectivesEvent $event) {
+                $event->directives[] = GlossaryDirective::class;
             }
         );
 
