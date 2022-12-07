@@ -4,11 +4,11 @@
     "src": "src/js/main.ts",
     "isEntry": true,
     "css": [
-      "assets/main.25cfe8e8.css"
+      "assets/main.105c4b7f.css"
     ]
   },
   "src/js/glossary.ts": {
-    "file": "assets/glossary.1324bfe0.js",
+    "file": "assets/glossary.bd1ba0ba.js",
     "src": "src/js/glossary.ts",
     "isEntry": true
   }
