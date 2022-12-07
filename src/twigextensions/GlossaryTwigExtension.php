@@ -10,6 +10,7 @@
 
 namespace percipiolondon\glossary\twigextensions;
 
+use percipiolondon\glossary\Glossary;
 use percipiolondon\glossary\records\GlossaryRecord;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
@@ -76,38 +77,18 @@ class GlossaryTwigExtension extends AbstractExtension
      *
      * @return string
      */
-    public function glossary($text): string
+    public function glossary(string $text, string $handle = null): string
     {
-        $glossaries = GlossaryRecord::find()
-            ->orderBy(['term' => SORT_ASC])
-            ->all();
-        $view = \Craft::$app->getView();
-        $termTemplate = '<span class="glossary-term">{{ text }}</span>';
-
-        foreach ($glossaries as $glossary) {
-            // https://stackoverflow.com/questions/20767089/preg-replace-when-not-inside-double-quotes
-            $pattern = '/\b'.$glossary->term.'\b(?![^"]*"(?:(?:[^"]*"){2})*[^"]*$)/i';
-            $replacement = '<span class="glossary"><span class="glossary-term">${1}</span><span class="glossary-definition">'.$glossary->definition.'</span></span>';
-            $text = preg_replace_callback(
-                $pattern,
-                function ($matches) use ($glossary){
-                    return '<span class="glossary"><span class="glossary-term">'.$matches[0].'</span><span class="glossary-definition">'.$glossary->definition.'</span></span>&nbsp;';
-                },
-                $text
-            );
-        }
-
-        return $text;
+        return Glossary::$plugin->glossaryService->renderGlossary($text, $handle);
     }
 
-    public function getGlossary($term): ?string
+    /**s
+     * @param $term
+     * @param string|null $handle
+     * @return string|null
+     */
+    public function getGlossary($term, string $handle = null): ?string
     {
-        $glossary = GlossaryRecord::findOne(['term' => strtolower($term)]);
-
-        if (!is_null($glossary)) {
-            return $glossary->definition;
-        }
-
-        return null;
+        return Glossary::$plugin->glossaryService->getGlossaryDefinition($term, $handle);
     }
 }
