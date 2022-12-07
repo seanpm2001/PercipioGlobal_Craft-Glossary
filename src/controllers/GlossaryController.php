@@ -182,97 +182,103 @@ class GlossaryController extends Controller
         $success = $glossary->save();
 
         if (!$success) {
+
             $errors[] = $glossary->errors;
-        }
 
-
-        /* VARIANTS */
-        // get all variants to reduce the list and the ones left needs to be deleted
-        $variantsToDelete = GlossaryRecord::find()
-            ->where(['parentId' => $glossary->id])
-            ->all();
-
-        // save variants
-        foreach($variants as $variant) {
-
-            // remove variant from variants to delete
-            $variantsToDelete = array_filter($variantsToDelete, function($var) use ($variant) {
-                return $var->term !== $variant;
-            });
-
-            // fetch variant if existing
-            $termRecord = GlossaryRecord::find()
-                ->where(['parentId' => $glossary->id, 'term' => $variant])
-                ->one();
-
-            // save current glossary
-            if ( is_null($termRecord)) {
-                $termRecord = new GlossaryRecord();
-            }
-
-            $termRecord->term = strtolower($variant);
-            $termRecord->parentId = $glossary->id;
-            $termRecord->siteId = $siteId;
-            $success = $termRecord->save();
-
-            if (!$success) {
-                $errors[] = ['termVariants' => $termRecord->errors['term']];
-            }
-        }
-
-        // delete variants if existing
-        foreach ($variantsToDelete as $deleteVariant) {
-            $deleteVariant->delete();
-        }
-
-
-        /* DEFINITIONS */
-        // get all variants to reduce the list and the ones left needs to be deleted
-        $definitionsToDelete = GlossaryDefinitionRecord::find()
-            ->where(['glossaryId' => $glossary->id])
-            ->all();
-
-        // save definitions
-        foreach($definitions as $definition) {
-
-            // remove variant from variants to delete
-            $definitionsToDelete = array_filter($definitionsToDelete, function($def) use ($definition) {
-                return $def['id'] !== $definition['id'];
-            });
-
-            // get definition
-            $definitionRecord = GlossaryDefinitionRecord::findOne($definition['id']);
-
-            if (is_null($definitionRecord)) {
-                $definitionRecord = new GlossaryDefinitionRecord();
-            }
-            $definitionRecord->definition = $definition['definition'];
-            $definitionRecord->glossaryId = $glossary->id;
-
-            if ($definition['exposure'] !== 'all') {
-                $definitionRecord->sectionHandle = $definition['exposure'];
-            }
-
-            $success = $definitionRecord->save();
-
-            if (!$success) {
-                $errors[] = ['definition' => $definitionRecord->errors];
-            }
-        }
-
-        if (count($definitions) === 0) {
-            $errors[] = ['definition' => ['There are no terms defined']];
         } else {
-            // delete definitions if existing
-            foreach ($definitionsToDelete as $deleteDefinition) {
-                $deleteDefinition->delete();
+
+            /* VARIANTS */
+            // get all variants to reduce the list and the ones left needs to be deleted
+            $variantsToDelete = GlossaryRecord::find()
+                ->where(['parentId' => $glossary->id])
+                ->all();
+
+            // save variants
+            foreach($variants as $variant) {
+
+                // remove variant from variants to delete
+                $variantsToDelete = array_filter($variantsToDelete, function($var) use ($variant) {
+                    return $var->term !== $variant;
+                });
+
+                // fetch variant if existing
+                $termRecord = GlossaryRecord::find()
+                    ->where(['parentId' => $glossary->id, 'term' => $variant])
+                    ->one();
+
+                // save current glossary
+                if ( is_null($termRecord)) {
+                    $termRecord = new GlossaryRecord();
+                }
+
+                $termRecord->term = strtolower($variant);
+                $termRecord->parentId = $glossary->id;
+                $termRecord->siteId = $siteId;
+                $success = $termRecord->save();
+
+                if (!$success) {
+                    $errors[] = ['termVariants' => $termRecord->errors['term']];
+                }
             }
+
+            // delete variants if existing
+            if ($id) {
+                foreach ($variantsToDelete as $deleteVariant) {
+                    $deleteVariant->delete();
+                }
+            }
+
+
+            /* DEFINITIONS */
+            // get all variants to reduce the list and the ones left needs to be deleted
+            $definitionsToDelete = GlossaryDefinitionRecord::find()
+                ->where(['glossaryId' => $glossary->id])
+                ->all();
+
+            // save definitions
+            foreach($definitions as $definition) {
+
+                // remove variant from variants to delete
+                $definitionsToDelete = array_filter($definitionsToDelete, function($def) use ($definition) {
+                    return $def['id'] !== $definition['id'];
+                });
+
+                // get definition
+                $definitionRecord = GlossaryDefinitionRecord::findOne($definition['id']);
+
+                if (is_null($definitionRecord)) {
+                    $definitionRecord = new GlossaryDefinitionRecord();
+                }
+                $definitionRecord->definition = $definition['definition'];
+                $definitionRecord->glossaryId = $glossary->id;
+
+                if ($definition['exposure'] !== 'all') {
+                    $definitionRecord->sectionHandle = $definition['exposure'];
+                }
+
+                $success = $definitionRecord->save();
+
+                if (!$success) {
+                    $errors[] = ['definition' => $definitionRecord->errors];
+                }
+            }
+
+            if (count($definitions) === 0) {
+                $errors[] = ['definition' => ['There are no terms defined']];
+            } elseif ($id) {
+                // delete definitions if existing
+                foreach ($definitionsToDelete as $deleteDefinition) {
+                    $deleteDefinition->delete();
+                }
+            }
+
         }
 
 
         return $this->asJson([
             'success' => $success,
-            'errors' => $errors
+            'errors' => $errors,
+            'glossaryId' => $glossary->id
         ]);
     }
 
