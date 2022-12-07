@@ -107,8 +107,8 @@ onMounted(async () => {
                     v-if="sortedTerms.length > 0"
                     lass="grid grid-cols-5 relative"
                 >
-                    <div class="col-span-5 px-6 py-2 bg-indigo-100 sticky top-[54px] z-10">
-                        <span class="font-primary font-bold">{{ letter }}</span>
+                    <div class="col-span-5 px-6 py-2 bg-gray-300 sticky top-[53px] z-10">
+                        <span class="font-primary font-bold uppercase">{{ letter }}</span>
                     </div>
                     <div 
                         v-for="term in sortedTerms"
