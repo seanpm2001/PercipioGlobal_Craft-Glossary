@@ -29,6 +29,7 @@ const errors = ref({
 const editId = ref(null)
 const loading = ref(false)
 const success = ref(false)
+const id = ref(props.glossaryId !== 0 ? props.glossaryId : null)
 
 const getErrors = (key) => {
     let keyedErrors = {}
@@ -115,6 +116,24 @@ const cancelDefinition = () => {
     editId.value = null
 }
 
+const onValidate = () => {
+    let valid = true
+
+    errors.value.form = []
+
+    if (termInput.value.length === 0) {
+        valid = false
+        errors.value.form.push({'term' : ["Term cannot be blank"]})
+    }
+
+    if (definitions.value.length === 0) {
+        valid = false
+        errors.value.form.push({'definition' : ['There are no terms defined']})
+    }
+
+    return valid
+}
+
 const submitForm = evt => {
     loading.value = true
 
@@ -123,31 +142,36 @@ const submitForm = evt => {
         termVariants: variants.value,
         definition: definitions.value,
         siteId: props.siteId,
-        id: props.glossaryId !== 0 ? props.glossaryId : null,
+        id: id.value,
         action: props.action
     }
 
     data[window.api.csrf.name] = window.api.csrf.value
 
-    axios({
-        method: 'post',
-        url: `${window.api.url}${window.api.cp}/actions/${props.action}`,
-        data: data
-    })
-    .then(function (response) {
-        if (response?.data?.errors.length > 0) {
-            errors.value.form = response?.data?.errors
-        } else {
-            errors.value.form = []
-            success.value = true
+    const valid = onValidate()
 
-            setTimeout(() => {
-                success.value = false
-            }, 5000)
-        }
+    if (valid) {
+        axios({
+            method: 'post',
+            url: `${window.api.url}${window.api.cp}/actions/${props.action}`,
+            data: data
+        })
+        .then(function (response) {
+            if (response?.data?.errors.length > 0) {
+                errors.value.form = response?.data?.errors
 
+                if (response?.data?.glossaryId) {
+                    id.value = response?.data?.glossaryId
+                }
+            } else {
+                window.location.href = `${window.api.url}${window.api.cp}/glossary`
+            }
+
+            loading.value = false
+        })
+    } else {
         loading.value = false
-    });
+    }
 }
 
 onMounted(async () => {
