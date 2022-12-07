@@ -8,9 +8,9 @@ const showModal = ref(false)
 const deletableId = ref(null)
 const loading = ref(true)
 const pagination = ref({
-        currentPage: 0,
-        hitsPerPage: 50,
-        total: 0
+                currentPage: 0,
+                hitsPerPage: 50,
+                total: 0
 })
 const alphabeth = ref("abcdefghijklmnopqrstuvwxyz".split(''))
 
@@ -33,10 +33,10 @@ const onFetch = async() => {
     const api = axios.create(configureApi(window.api.url))
 
     await executeApi(api, 'glossary/get-glossaries', `?limit=${pagination.value.hitsPerPage}&offset=${pagination.value.currentPage}&sort=4`, (response) => {
-            terms.value = [...(terms.value || []), ...response.glossary]
-            pagination.value.currentPage += 1
-            pagination.value.total = Math.ceil(response.total / pagination.value.hitsPerPage)
-            loading.value = false
+        terms.value = [...(terms.value || []), ...response.glossary]
+        pagination.value.currentPage += 1
+        pagination.value.total = Math.ceil(response.total / pagination.value.hitsPerPage)
+        loading.value = false
     })
 }
 
@@ -46,11 +46,11 @@ const onDelete = async(id) => {
     const api = axios.create(configureApi(`${window.api.url}${window.api.cp}`))
 
     await executeApi(api, 'glossary/delete', `?id=${id}`, (response) => {
-            if(response.success) {
-                    terms.value = terms.value.filter(term => term.id !== id)
-                    pagination.value.total -= 1
-                    loading.value = false
-            }
+        if(response.success) {
+            terms.value = terms.value.filter(term => term.id !== id)
+            pagination.value.total -= 1
+            loading.value = false
+        }
     })
 }
 
@@ -58,9 +58,9 @@ const sorted = computed(() => {
     let sorted = {}
 
     if (terms.value) {
-            alphabeth.value.forEach(letter => {
-                    sorted[letter] = terms.value.filter(term => term.term.charAt(0) === letter)
-            })
+        alphabeth.value.forEach(letter => {
+            sorted[letter] = terms.value.filter(term => term.term.charAt(0) === letter)
+        })
     }
 
     return sorted
@@ -135,7 +135,7 @@ onMounted(async () => {
               <span v-if="term?.variants && term?.variants.length === 0">-</span>
             </div>
             <div class="px-6 py-4">
-              {{ term?.definitions.length === 1 ? (term?.definitions[0].sectionHandle ? term?.definitions[0].sectionHandle : 'all') : 'multiple' }}
+              {{ term?.definitions.length === 1 ? (term?.definitions[0].sectionHandle ? term?.definitions[0].sectionHandle : '') : '' }}
             </div>
             <div class="px-6 py-4 whitespace-nowrap flex items-center space-x-4">
               <a
