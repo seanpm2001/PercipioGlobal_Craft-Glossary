@@ -46,7 +46,7 @@
     },
     "extra": {
         "name": "Glossary",
-        "handle": "glossary",
+        "handle": "glossary-of-terms",
         "developer": "percipiolondon",
         "developerUrl": "https://percipio.london",
         "documentationUrl": "https://github.com/percipioglobal/craft-glossary/blob/master/README.md",
