@@ -191,7 +191,7 @@ class Glossary extends Plugin
 
         Craft::info(
             Craft::t(
-                'glossary',
+                'glossary-of-terms',
                 '{name} plugin loaded',
                 ['name' => $this->name]
             ),
