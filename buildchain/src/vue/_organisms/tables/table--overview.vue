@@ -138,10 +138,12 @@ onMounted(async () => {
               </span>
               <span v-if="term?.variants && term?.variants.length === 0">-</span>
             </div>
-            <div :class="[
+            <div
+              :class="[
                 'px-6 py-4',
                 exposure(term) === 'default' ? 'text-gray-300' : ''
-            ]">
+              ]"
+            >
               {{ exposure(term) }}
             </div>
             <div class="px-6 py-4 whitespace-nowrap flex items-center space-x-4">
