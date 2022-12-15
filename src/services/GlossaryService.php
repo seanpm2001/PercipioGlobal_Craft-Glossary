@@ -23,9 +23,39 @@ class GlossaryService extends Component
         foreach ($glossaries as $glossary) {
             // https://stackoverflow.com/questions/20767089/preg-replace-when-not-inside-double-quotes
             if ($glossary->parentId) {
-                $definition = GlossaryDefinitionRecord::findOne(['glossaryId' => $glossary->parentId, 'sectionHandle' => $handle]);
+                if ($handle) {
+                    $definition = GlossaryDefinitionRecord::findOne(['glossaryId' => $glossary->parentId, 'sectionHandle' => $handle]);
+                } else {
+                    $definition = GlossaryDefinitionRecord::find()
+                        ->where( ['glossaryId' => $glossary->parentId])
+                        ->andWhere('sectionHandle IS NULL')
+                        ->one();
+                }
+
+                // fallback if there was no result for the handle
+                if (is_null($definition)) {
+                    $definition = GlossaryDefinitionRecord::find()
+                        ->where( ['glossaryId' => $glossary->parentId])
+                        ->andWhere('sectionHandle IS NULL')
+                        ->one();
+                }
             } else {
-                $definition = GlossaryDefinitionRecord::findOne(['glossaryId' => $glossary->id, 'sectionHandle' => $handle]);
+                if ($handle) {
+                    $definition = GlossaryDefinitionRecord::findOne(['glossaryId' => $glossary->id, 'sectionHandle' => $handle]);
+                } else {
+                    $definition = GlossaryDefinitionRecord::find()
+                        ->where( ['glossaryId' => $glossary->id])
+                        ->andWhere('sectionHandle IS NULL')
+                        ->one();
+                }
+
+                // fallback if there was no result for the handle
+                if (is_null($definition)) {
+                    $definition = GlossaryDefinitionRecord::find()
+                        ->where( ['glossaryId' => $glossary->id])
+                        ->andWhere('sectionHandle IS NULL')
+                        ->one();
+                }
             }
 
             if ($definition) {

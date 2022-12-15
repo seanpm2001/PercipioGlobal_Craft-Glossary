@@ -44,6 +44,6 @@ class Glossary extends Directive
 
     public static function apply(mixed $source, mixed $value, array $arguments, ResolveInfo $resolveInfo): mixed
     {
-        return Plugin::$plugin->glossaryService->renderGlossary($value);
+        return Plugin::$plugin->glossaryService->renderGlossary($value, $arguments['handle'] ?? null);
     }
 }

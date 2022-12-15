@@ -1,4 +1,4 @@
-{%- extends 'glossary/_layouts/cp.twig' -%}
+{%- extends 'glossary-of-terms/_layouts/cp.twig' -%}
 
 {%- set tagOptions = {
     'depends': [
@@ -20,34 +20,34 @@
 
     <div id="glossary">
         {{ csrfInput() }}
-        <form-glossary :site-id="{{- currentSite.id -}}" :glossary-id="{{- glossary.id ?? 0 -}}" sections="{{- sections|json_encode -}}" action="glossary/glossary/save"></form-glossary>
+        <form-glossary :site-id="{{- currentSite.id -}}" :glossary-id="{{- glossary.id ?? 0 -}}" sections="{{- sections|json_encode -}}" action="glossary-of-terms/glossary/save"></form-glossary>
     </div>
 
 
-{#    <input type="hidden" name="action" value="glossary/glossary/save" />#}
-{#    <input type="hidden" name="glossaryId" value="{{- glossary.id ?? '' -}}" />#}
-{#    <input type="hidden" name="siteId" value="{{- glossary.siteId ?? currentSite.id -}}" />#}
+    {#    <input type="hidden" name="action" value="glossary/glossary/save" />#}
+    {#    <input type="hidden" name="glossaryId" value="{{- glossary.id ?? '' -}}" />#}
+    {#    <input type="hidden" name="siteId" value="{{- glossary.siteId ?? currentSite.id -}}" />#}
 
-{#    {{ forms.textField({#}
-{#        first: true,#}
-{#        label: "Term"|t('glossary'),#}
-{#        id: 'term',#}
-{#        name: 'term',#}
-{#        value: glossary.term ??  '',#}
-{#        errors: errors['term'] ?? null,#}
-{#        autofocus: true,#}
-{#        required: true,#}
-{#    }) }}#}
+    {#    {{ forms.textField({#}
+    {#        first: true,#}
+    {#        label: "Term"|t('glossary'),#}
+    {#        id: 'term',#}
+    {#        name: 'term',#}
+    {#        value: glossary.term ??  '',#}
+    {#        errors: errors['term'] ?? null,#}
+    {#        autofocus: true,#}
+    {#        required: true,#}
+    {#    }) }}#}
 
-{#    {{ forms.textareaField({#}
-{#        first: true,#}
-{#        label: "Definition"|t('glossary'),#}
-{#        id: 'definition',#}
-{#        name: 'definition',#}
-{#        value: glossary.definition ??  '',#}
-{#        errors: errors['definition'] ?? null,#}
-{#        autofocus: true,#}
-{#        required: true,#}
-{#    }) }}#}
+    {#    {{ forms.textareaField({#}
+    {#        first: true,#}
+    {#        label: "Definition"|t('glossary'),#}
+    {#        id: 'definition',#}
+    {#        name: 'definition',#}
+    {#        value: glossary.definition ??  '',#}
+    {#        errors: errors['definition'] ?? null,#}
+    {#        autofocus: true,#}
+    {#        required: true,#}
+    {#    }) }}#}
 
 {%- endset -%}

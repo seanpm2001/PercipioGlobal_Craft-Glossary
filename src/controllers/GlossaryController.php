@@ -60,14 +60,14 @@ class GlossaryController extends Controller
         $variables = [];
 
         $pluginName = 'Glossary';
-        $templateTitle = Craft::t('glossary', 'Glossary');
+        $templateTitle = Craft::t('glossary-of-terms', 'Glossary');
 
         $variables['controllerHandle'] = 'glossary';
         $variables['title'] = $templateTitle;
         $variables['docTitle'] = sprintf('%s - %s', $pluginName, $templateTitle);
 
         // Render the template
-        return $this->renderTemplate('glossary/index', $variables);
+        return $this->renderTemplate('glossary-of-terms/index', $variables);
     }
 
     public function actionEdit(int $id = null): Response
@@ -75,7 +75,7 @@ class GlossaryController extends Controller
         $variables = [];
 
         $pluginName = 'Glossary';
-        $templateTitle = Craft::t('glossary', 'Glossary');
+        $templateTitle = Craft::t('glossary-of-terms', 'Glossary');
 
         $variables['controllerHandle'] = 'glossary';
         $variables['title'] = $templateTitle;
@@ -88,7 +88,7 @@ class GlossaryController extends Controller
         }
 
         // Render the template
-        return $this->renderTemplate('glossary/form', $variables);
+        return $this->renderTemplate('glossary-of-terms/form', $variables);
     }
 
     public function actionGetGlossaries(int $limit = null, int $offset = null, int $sort = SORT_DESC): Response
@@ -238,7 +238,7 @@ class GlossaryController extends Controller
             // save definitions
             foreach($definitions as $definition) {
 
-                // remove variant from variants to delete
+                // remove definition from deefinitions to delete
                 $definitionsToDelete = array_filter($definitionsToDelete, function($def) use ($definition) {
                     return $def['id'] !== $definition['id'];
                 });
@@ -254,6 +254,8 @@ class GlossaryController extends Controller
 
                 if ($definition['exposure'] !== 'all') {
                     $definitionRecord->sectionHandle = $definition['exposure'];
+                } else {
+                    $definitionRecord->sectionHandle = null;
                 }
 
                 $success = $definitionRecord->save();

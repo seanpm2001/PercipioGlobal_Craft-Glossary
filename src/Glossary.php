@@ -204,10 +204,10 @@ class Glossary extends Plugin
     protected function customAdminCpRoutes(): array
     {
         return [
-            'glossary' => 'glossary/glossary/overview',
-            'glossary/edit' => 'glossary/glossary/edit',
-            'glossary/delete' => 'glossary/glossary/delete',
-            'glossary/add' => 'glossary/glossary/edit',
+            'glossary-of-terms' => 'glossary-of-terms/glossary/overview',
+            'glossary-of-terms/edit' => 'glossary-of-terms/glossary/edit',
+            'glossary-of-terms/delete' => 'glossary-of-terms/glossary/delete',
+            'glossary-of-terms/add' => 'glossary-of-terms/glossary/edit',
         ];
     }
 
@@ -216,8 +216,8 @@ class Glossary extends Plugin
     protected function customSiteRoutes(): array
     {
         return [
-            'glossary/get-glossaries' => 'glossary/glossary/get-glossaries',
-            'glossary/get-glossary' => 'glossary/glossary/get-glossary',
+            'glossary-of-terms/get-glossaries' => 'glossary-of-terms/glossary/get-glossaries',
+            'glossary-of-terms/get-glossary' => 'glossary-of-terms/glossary/get-glossary',
         ];
     }
 }

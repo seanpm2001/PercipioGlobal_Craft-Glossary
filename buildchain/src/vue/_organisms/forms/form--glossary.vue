@@ -164,7 +164,7 @@ const submitForm = () => {
                     id.value = response?.data?.glossaryId
                 }
             } else {
-                window.location.href = `${window.api.url}${window.api.cp}/glossary`
+                window.location.href = `${window.api.url}${window.api.cp}/glossary-of-terms`
             }
 
             loading.value = false
@@ -179,7 +179,7 @@ onMounted(async () => {
         loading.value = true
         const api = axios.create(configureApi(window.api.url))
 
-        await executeApi(api, 'glossary/get-glossary', `?id=${props.glossaryId}`, (response) => {
+        await executeApi(api, 'glossary-of-terms/get-glossary', `?id=${props.glossaryId}`, (response) => {
             termInput.value = response?.term?.term ?? ''
             variants.value = response?.variants?.map(variant => variant.term)
             definitions.value = response?.definitions.map(definition => {
@@ -187,7 +187,7 @@ onMounted(async () => {
                     id: definition.id,
                     definition: definition.definition,
                     exposure: definition.sectionHandle ? definition.sectionHandle : 'all',
-                    exposureName: JSON.parse(props.sections).find(section => section.handle === definition.sectionHandle)?.name ?? 'all'
+                    exposureName: JSON.parse(props.sections).find(section => section.handle === definition.sectionHandle)?.name ?? 'default'
                 }
             })
 
@@ -365,7 +365,7 @@ onMounted(async () => {
                 value="all"
                 default
               >
-                All
+                Default
               </option>
               <option
                 v-for="section in JSON.parse(sections)"

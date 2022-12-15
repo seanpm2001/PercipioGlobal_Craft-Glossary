@@ -15,7 +15,7 @@ const pagination = ref({
 const alphabeth = ref("abcdefghijklmnopqrstuvwxyz".split(''))
 
 const getEditUrl = (id) => {
-    return `${ window.api.url }${ window.api.cp }/glossary/edit?id=${ id }`
+    return `${ window.api.url }${ window.api.cp }/glossary-of-terms/edit?id=${ id }`
 }
 
 const onToggleModal = (state, id = null) => {
@@ -32,7 +32,7 @@ const onFetch = async() => {
     loading.value = true
     const api = axios.create(configureApi(window.api.url))
 
-    await executeApi(api, 'glossary/get-glossaries', `?limit=${pagination.value.hitsPerPage}&offset=${pagination.value.currentPage}&sort=4`, (response) => {
+    await executeApi(api, 'glossary-of-terms/get-glossaries', `?limit=${pagination.value.hitsPerPage}&offset=${pagination.value.currentPage}&sort=4`, (response) => {
         terms.value = [...(terms.value || []), ...response.glossary]
         pagination.value.currentPage += 1
         pagination.value.total = Math.ceil(response.total / pagination.value.hitsPerPage)
@@ -45,7 +45,7 @@ const onDelete = async(id) => {
     onToggleModal(false)
     const api = axios.create(configureApi(`${window.api.url}${window.api.cp}`))
 
-    await executeApi(api, 'glossary/delete', `?id=${id}`, (response) => {
+    await executeApi(api, 'glossary-of-terms/delete', `?id=${id}`, (response) => {
         if(response.success) {
             terms.value = terms.value.filter(term => term.id !== id)
             pagination.value.total -= 1
@@ -53,6 +53,11 @@ const onDelete = async(id) => {
         }
     })
 }
+
+const exposure = term => {
+    return term?.definitions.length === 1 ? (term?.definitions[0].sectionHandle ? term?.definitions[0].sectionHandle : 'default') : 'default'
+}
+
 
 const sorted = computed(() => {
     let sorted = {}
@@ -65,7 +70,6 @@ const sorted = computed(() => {
 
     return sorted
 })
-
 onMounted(async () => {
     onFetch()
 })
@@ -89,7 +93,7 @@ onMounted(async () => {
         </div>
 
         <div class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-          Environment
+          Exposure
         </div>
 
         <div class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -109,7 +113,7 @@ onMounted(async () => {
           <div class="col-span-5 px-6 py-2 bg-gray-300 sticky top-[53px] z-10">
             <span class="font-primary font-bold uppercase">{{ letter }}</span>
           </div>
-          <div 
+          <div
             v-for="term in sortedTerms"
             :key="term.term"
             class="col-span-6 grid grid-cols-6"
@@ -126,7 +130,7 @@ onMounted(async () => {
               </span>
             </div>
             <div class="px-6 py-4 flex items-center">
-              <span 
+              <span
                 v-for="(variant, i) in term.variants"
                 :key="variant.id"
               >
@@ -134,8 +138,11 @@ onMounted(async () => {
               </span>
               <span v-if="term?.variants && term?.variants.length === 0">-</span>
             </div>
-            <div class="px-6 py-4">
-              {{ term?.definitions.length === 1 ? (term?.definitions[0].sectionHandle ? term?.definitions[0].sectionHandle : '') : '' }}
+            <div :class="[
+                'px-6 py-4',
+                exposure(term) === 'default' ? 'text-gray-300' : ''
+            ]">
+              {{ exposure(term) }}
             </div>
             <div class="px-6 py-4 whitespace-nowrap flex items-center space-x-4">
               <a
