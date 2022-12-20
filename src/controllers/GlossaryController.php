@@ -238,7 +238,7 @@ class GlossaryController extends Controller
             // save definitions
             foreach($definitions as $definition) {
 
-                // remove definition from deefinitions to delete
+                // remove definition from definitions to delete
                 $definitionsToDelete = array_filter($definitionsToDelete, function($def) use ($definition) {
                     return $def['id'] !== $definition['id'];
                 });
