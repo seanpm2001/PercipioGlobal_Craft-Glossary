@@ -12,7 +12,7 @@
 
     {%- set mappedSections = [] -%}
     {% for section in craft.app.sections.allSections %}
-        {%- if sections | filter(sec => sec == section.handle) | length > 0 -%}
+        {%- if (sections ?? []) | filter(sec => sec == section.handle) | length > 0 -%}
             {%- set mappedSections = mappedSections|merge([{
                 handle: section.handle,
                 name: section.name

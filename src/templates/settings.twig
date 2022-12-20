@@ -9,7 +9,7 @@
         label: section.name,
         id: 'glossary-' ~ section.handle,
         value: section.handle,
-        checked: settings['sections'] | filter(sec => sec == section.handle) | length > 0
+        checked: (settings['sections'] ?? []) | filter(sec => sec == section.handle) | length > 0
     }]) -%}
 {% endfor %}
 
