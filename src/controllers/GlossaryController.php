@@ -12,6 +12,7 @@ namespace percipiolondon\glossary\controllers;
 
 use Craft;
 
+use percipiolondon\glossary\Glossary;
 use percipiolondon\glossary\records\GlossaryDefinitionRecord;
 use percipiolondon\glossary\records\GlossaryRecord;
 use yii\web\Response;
@@ -82,6 +83,7 @@ class GlossaryController extends Controller
         $variables['docTitle'] = sprintf('%s - %s', $pluginName, $templateTitle);
 
         $variables['glossary'] = null;
+        $variables['sections'] = Glossary::$plugin->getSettings()->sections;
 
         if ($id) {
             $variables['glossary'] = GlossaryRecord::findOne($id);

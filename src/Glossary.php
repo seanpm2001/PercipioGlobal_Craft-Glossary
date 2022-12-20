@@ -10,6 +10,7 @@
 
 namespace percipiolondon\glossary;
 
+use percipiolondon\glossary\models\Settings;
 use percipiolondon\glossary\services\GlossaryService;
 use percipiolondon\glossary\twigextensions\GlossaryTwigExtension;
 use percipiolondon\glossary\variables\GlossaryVariable;
@@ -27,7 +28,11 @@ use craft\services\Gql;
 use craft\events\RegisterGqlDirectivesEvent;
 use percipiolondon\glossary\gql\directives\Glossary as GlossaryDirective;
 
+use Twig\Error\LoaderError;
+use Twig\Error\RuntimeError;
+use Twig\Error\SyntaxError;
 use yii\base\Event;
+use yii\base\Exception;
 
 /**
  * Craft plugins are very much like little applications in and of themselves. We’ve made
@@ -79,7 +84,7 @@ class Glossary extends Plugin
      *
      * @var bool
      */
-    public bool $hasCpSettings = false;
+    public bool $hasCpSettings = true;
 
     /**
      * Set to `true` if the plugin should have its own section (main nav item) in the control panel.
@@ -219,5 +224,37 @@ class Glossary extends Plugin
             'glossary-of-terms/get-glossaries' => 'glossary-of-terms/glossary/get-glossaries',
             'glossary-of-terms/get-glossary' => 'glossary-of-terms/glossary/get-glossary',
         ];
+    }
+
+    // Protected Methods
+    // =========================================================================
+    /**
+     * Creates and returns the model used to store the plugin’s settings.
+     *
+     * @return Settings
+     */
+    protected function createSettingsModel(): Settings
+    {
+        return new Settings();
+    }
+
+    /**
+     * Returns the rendered settings HTML, which will be inserted into the content
+     * block on the settings page.
+     *
+     * @return string|null The rendered settings HTML
+     * @throws Exception
+     * @throws LoaderError
+     * @throws RuntimeError
+     * @throws SyntaxError
+     */
+    protected function settingsHtml(): ?string
+    {
+        return Craft::$app->view->renderTemplate(
+            'glossary-of-terms/settings',
+            [
+                'settings' => $this->settings
+            ]
+        );
     }
 }

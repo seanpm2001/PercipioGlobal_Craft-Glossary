@@ -6,10 +6,10 @@ use craft\base\Component;
 use percipiolondon\glossary\records\GlossaryDefinitionRecord;
 use percipiolondon\glossary\records\GlossaryRecord;
 
+
 class GlossaryService extends Component
 {
     public array $matches = [];
-    public array $test = [];
 
     public function renderGlossary(string $text, string|null $handle = null): string
     {
@@ -18,7 +18,6 @@ class GlossaryService extends Component
             ->all();
 
         $this->matches = [];
-        $this->test = [];
 
         foreach ($glossaries as $glossary) {
             // https://stackoverflow.com/questions/20767089/preg-replace-when-not-inside-double-quotes
@@ -92,7 +91,6 @@ class GlossaryService extends Component
             $text = preg_replace_callback(
                 $pattern,
                 function () use ($glossary){
-                    $this->test[] = $glossary['glossary'];
                     return '<span class="glossary"><span class="glossary-term">'.$glossary['glossary'].'</span><span class="glossary-definition">'.$glossary['definition'].'</span></span>';
                 },
                 $text

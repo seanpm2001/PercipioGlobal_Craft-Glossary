@@ -1,0 +1,21 @@
+{% import "_includes/forms" as forms %}
+
+<h2>Select onto which sections the glossary applies to</h2>
+
+{%- set sections = [] -%}
+{% for section in craft.app.sections.allSections %}
+    {%- set sections = sections|merge([{
+        name: 'sections[]',
+        label: section.name,
+        id: 'glossary-' ~ section.handle,
+        value: section.handle,
+        checked: settings['sections'] | filter(sec => sec == section.handle) | length > 0
+    }]) -%}
+{% endfor %}
+
+
+{{ forms.checkboxGroupField({
+    label: 'Sections'|t('app'),
+    options: sections,
+    values: settings['sections'] ?? []
+}) }}
