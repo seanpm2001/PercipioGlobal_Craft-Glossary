@@ -77,7 +77,7 @@ class GlossaryTwigExtension extends AbstractExtension
      *
      * @return string
      */
-    public function glossary(string $text = null, string $handle = null): string
+    public function glossary(string $text = null, string $handle = null): string | null
     {
         if ($text) {
             return Glossary::$plugin->glossaryService->renderGlossary($text, $handle);
