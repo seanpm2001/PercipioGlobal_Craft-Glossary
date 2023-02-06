@@ -178,7 +178,7 @@ class GlossaryController extends Controller
             $glossary = new GlossaryRecord();
         }
 
-        $glossary->term = strtolower($term);
+        $glossary->term = rtrim(strtolower($term));
         $glossary->siteId = $siteId;
         $glossary->parentId = null;
         $success = $glossary->save();
@@ -213,7 +213,7 @@ class GlossaryController extends Controller
                     $termRecord = new GlossaryRecord();
                 }
 
-                $termRecord->term = strtolower($variant);
+                $termRecord->term = rtrim(strtolower($variant));
                 $termRecord->parentId = $glossary->id;
                 $termRecord->siteId = $siteId;
                 $success = $termRecord->save();
